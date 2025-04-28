@@ -25,7 +25,6 @@ services:
       # Cloudflare
       # - CF_API_EMAIL
       # - CF_API_KEY
-      # - CF_DNS_API_TOKEN
       # Application
       # - BASE_DOMAIN
       # - ACME_EMAIL
@@ -39,7 +38,7 @@ services:
       - "/root/letsencrypt:/letsencrypt"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik-dashboard.your.domain.com`)"
+      - "traefik.http.routers.traefik-dashboard.rule=Host(`traefik.$BASE_DOMAIN`)"
       - "traefik.http.routers.traefik-dashboard.service=traefik-dashboard"
       - "traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080"
     networks:
