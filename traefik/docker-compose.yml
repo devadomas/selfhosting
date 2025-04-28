@@ -24,8 +24,8 @@ services:
       #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
     environment:
       # Cloudflare
-      - CLOUDFLARE_EMAIL=$CLOUDFLARE_EMAIL
-      - CLOUDFLARE_API_KEY=$CLOUDFLARE_API_KEY
+      - CF_API_EMAIL=$CF_API_EMAIL
+      - CF_API_KEY=$CF_API_KEY
       # Portainer templating envs
       # - BASE_DOMAIN
       # - ACME_EMAIL
