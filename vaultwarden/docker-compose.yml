@@ -3,10 +3,33 @@ services:
     image: vaultwarden/server:latest
     container_name: vaultwarden
     restart: always
+    # Envs loaded from Portainer Stack
     environment:
-      # DOMAIN: for security reasons is set via Portainer environment variable
-      SIGNUPS_ALLOWED: "true" # Deactivate this with "false" after you have created your account so that no strangers can register
+      DOMAIN: https://$SUBDOMAIN.$BASE_DOMAIN
+      SIGNUPS_ALLOWED: "true"
+    # Parsable ENVs
+      # SUBDOMAIN
+      # BASE_DOMAIN
     volumes:
       - /root/vw-data:/data
-    ports:
-      - 11001:80
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=public
+      - traefik.http.middlewares.redirect-https.redirectScheme.scheme=https
+      - traefik.http.middlewares.redirect-https.redirectScheme.permanent=true
+      - traefik.http.routers.bitwarden-https.rule=Host(`$SUBDOMAIN.$BASE_DOMAIN`)
+      - traefik.http.routers.bitwarden-https.entrypoints=websecure
+      - traefik.http.routers.bitwarden-https.tls=true
+      - traefik.http.routers.bitwarden-https.service=bitwarden
+      - traefik.http.routers.bitwarden-http.rule=Host(`$SUBDOMAIN.$BASE_DOMAIN`)
+      - traefik.http.routers.bitwarden-http.entrypoints=web
+      - traefik.http.routers.bitwarden-http.middlewares=redirect-https
+      - traefik.http.routers.bitwarden-http.service=bitwarden
+      - traefik.http.services.bitwarden.loadbalancer.server.port=80
+    networks:
+      - public
+
+networks:
+  public:
+    name: traefik_public # traefik public network
+    external: true
