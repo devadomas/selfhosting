@@ -22,11 +22,11 @@ services:
       - "--certificatesresolvers.myresolver.acme.email=$ACME_EMAIL"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
       #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
-    # environment:
+    environment:
       # Cloudflare
-      # - CLOUDFLARE_EMAIL
-      # - CLOUDFLARE_API_KEY
-      # Application
+      - CLOUDFLARE_EMAIL=$CLOUDFLARE_EMAIL
+      - CLOUDFLARE_API_KEY=$CLOUDFLARE_API_KEY
+      # Portainer templating envs
       # - BASE_DOMAIN
       # - ACME_EMAIL
     ports:
@@ -56,6 +56,7 @@ services:
       - "traefik.http.routers.whoami.entrypoints=websecure"
       - "traefik.http.routers.whoami.tls.certresolver=myresolver"
     # environment:
+      # Portainer templating envs
       # - BASE_DOMAIN
     networks:
       - public
