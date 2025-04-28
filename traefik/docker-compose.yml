@@ -23,8 +23,8 @@ services:
       #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
     # environment:
       # Cloudflare
-      # - CF_API_EMAIL
-      # - CF_API_KEY
+      # - CLOUDFLARE_EMAIL
+      # - CLOUDFLARE_API_KEY
       # Application
       # - BASE_DOMAIN
       # - ACME_EMAIL
@@ -51,9 +51,11 @@ services:
     container_name: "simple-service"
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.example.com`)"
+      - "traefik.http.routers.whoami.rule=Host(`whoami.$BASE_DOMAIN`)"
       - "traefik.http.routers.whoami.entrypoints=websecure"
       - "traefik.http.routers.whoami.tls.certresolver=myresolver"
+    # environment:
+      # - BASE_DOMAIN
     networks:
       - public
 
