@@ -1,6 +1,7 @@
 services:
-  public_traefik:
+  public:
     image: traefik:v3.3
+    container_name: traefik
     command:
       - "--log.level=DEBUG"
       # API
