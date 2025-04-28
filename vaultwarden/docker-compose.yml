@@ -3,13 +3,22 @@ services:
     image: vaultwarden/server:latest
     container_name: vaultwarden
     restart: always
-    # Envs loaded from Portainer Stack
     environment:
-      DOMAIN: https://$SUBDOMAIN.$BASE_DOMAIN
-      SIGNUPS_ALLOWED: "true"
-    # Parsable ENVs
+      - DOMAIN=https://$SUBDOMAIN.$BASE_DOMAIN
+      # App config
+      - SIGNUPS_ALLOWED=false
+      - INVITATIONS_ALLOWED=true
+      # Push notifications
+      - PUSH_ENABLED=true
+      - PUSH_INSTALLATION_ID=$PUSH_INSTALLATION_ID
+      - PUSH_INSTALLATION_KEY=$PUSH_INSTALLATION_KEY
+      - PUSH_RELAY_URI=https://api.bitwarden.eu
+      - PUSH_IDENTITY_URI=https://identity.bitwarden.eu
+    # Parsable ENVs filled from Portainer
       # SUBDOMAIN
       # BASE_DOMAIN
+      # PUSH_INSTALLATION_ID
+      # PUSH_INSTALLATION_KEY
     volumes:
       - /root/vw-data:/data
     labels:
