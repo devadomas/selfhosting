@@ -3,7 +3,12 @@ services:
     image: traefik:v3.3
     container_name: traefik
     command:
-      - "--log.level=DEBUG"
+      - "--log"
+      - "--log.level=INFO"
+      # Access logs for fail2ban
+      - "--accesslog"
+      - "--accesslog.filepath=/var/log/access.log"
+      - "--accesslog.filters.statuscodes=400-499"
       # API
       # - "--api.insecure=true"
       # 
@@ -37,6 +42,7 @@ services:
       # - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro" # Listen to docker events read-only
+      - "/var/log/traefik:/var/log" # For access logs
       - "/root/letsencrypt:/letsencrypt"
     labels:
       - "traefik.enable=true"
