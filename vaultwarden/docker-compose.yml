@@ -14,6 +14,8 @@ services:
       - PUSH_INSTALLATION_KEY=$PUSH_INSTALLATION_KEY
       - PUSH_RELAY_URI=https://api.bitwarden.eu
       - PUSH_IDENTITY_URI=https://identity.bitwarden.eu
+      # Logging
+      - LOG_FILE=/var/log/vaultwarden.log
     # Parsable ENVs filled from Portainer
       # SUBDOMAIN
       # BASE_DOMAIN
@@ -21,9 +23,10 @@ services:
       # PUSH_INSTALLATION_KEY
     volumes:
       - /root/vw-data:/data
+      - /var/log/vaultwarden:/var/log # For log writing only
     labels:
       - traefik.enable=true
-      - traefik.docker.network=public
+      - traefik.docker.network=traefik_public # maybe should be something not created via docker-compose
       - traefik.http.middlewares.redirect-https.redirectScheme.scheme=https
       - traefik.http.middlewares.redirect-https.redirectScheme.permanent=true
       - traefik.http.routers.bitwarden-https.rule=Host(`$SUBDOMAIN.$BASE_DOMAIN`)
