@@ -5,24 +5,23 @@ services:
     command:
       - "--log"
       - "--log.level=INFO"
-      # Access logs for fail2ban
-      - "--accesslog"
-      - "--accesslog.filepath=/var/log/access.log"
-      - "--accesslog.filters.statuscodes=400-499"
+      # Access logs for fail2ban (TODO)
+      # - "--accesslog"
+      # - "--accesslog.filepath=/var/log/access.log"
+      # - "--accesslog.filters.statuscodes=400-499"
       # API
       # - "--api.insecure=true"
-      # 
+      # Docker
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      # 
+      # HTTP -> HTTPS
       - "--entrypoints.web.address=:80"
       - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-      # 
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.websecure.http.tls.domains[0].main=$BASE_DOMAIN"
       - "--entrypoints.websecure.http.tls.domains[0].sans=*.$BASE_DOMAIN"
       - "--entrypoints.websecure.http.tls.certresolver=myresolver"
-      # 
+      # Let's Encrypt cert generation for main domain + wildcard subdomains
       - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
       - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=cloudflare"
       - "--certificatesresolvers.myresolver.acme.email=$ACME_EMAIL"
@@ -42,7 +41,7 @@ services:
       # - "8080:8080"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro" # Listen to docker events read-only
-      - "/var/log/traefik:/var/log" # For access logs
+      # - "/var/log/traefik:/var/log" # For access logs (TODO)
       - "/root/letsencrypt:/letsencrypt"
     labels:
       - "traefik.enable=true"
