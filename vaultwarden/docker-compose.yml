@@ -55,7 +55,7 @@ services:
 
     volumes:
       - /root/fail2ban:/data
-      - /var/log/vaultwarden:/var/log:ro # Log mount
+      - /var/log/vaultwarden:/logs:ro # Log mount
 
     network_mode: "host"
     privileged: true
