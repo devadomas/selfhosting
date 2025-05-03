@@ -27,19 +27,41 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik_public # maybe should be something not created via docker-compose
-      - traefik.http.middlewares.redirect-https.redirectScheme.scheme=https
-      - traefik.http.middlewares.redirect-https.redirectScheme.permanent=true
-      - traefik.http.routers.bitwarden-https.rule=Host(`$SUBDOMAIN.$BASE_DOMAIN`)
-      - traefik.http.routers.bitwarden-https.entrypoints=websecure
-      - traefik.http.routers.bitwarden-https.tls=true
-      - traefik.http.routers.bitwarden-https.service=bitwarden
-      - traefik.http.routers.bitwarden-http.rule=Host(`$SUBDOMAIN.$BASE_DOMAIN`)
-      - traefik.http.routers.bitwarden-http.entrypoints=web
-      - traefik.http.routers.bitwarden-http.middlewares=redirect-https
-      - traefik.http.routers.bitwarden-http.service=bitwarden
+      - traefik.http.routers.bitwarden.rule=Host(`$SUBDOMAIN.$BASE_DOMAIN`)
+      - traefik.http.routers.bitwarden.entrypoints=websecure
+      - traefik.http.routers.bitwarden.tls=true
+      - traefik.http.routers.bitwarden.service=bitwarden
       - traefik.http.services.bitwarden.loadbalancer.server.port=80
+      # HTTP is disabled, server is accessible only via HTTPS
+      # - traefik.http.middlewares.redirect-https.redirectScheme.scheme=https
+      # - traefik.http.middlewares.redirect-https.redirectScheme.permanent=true
+      # - traefik.http.routers.bitwarden-http.rule=Host(`$SUBDOMAIN.$BASE_DOMAIN`)
+      # - traefik.http.routers.bitwarden-http.entrypoints=web
+      # - traefik.http.routers.bitwarden-http.middlewares=redirect-https
+      # - traefik.http.routers.bitwarden-http.service=bitwarden
     networks:
       - public
+
+  fail2ban:
+    container_name: fail2ban
+    restart: always
+    image: crazymax/fail2ban:latest
+    environment: 
+      - TZ # Timezone passed from server
+      - F2B_DB_PURGE_AGE=30d
+      - F2B_LOG_TARGET=/data/fail2ban.log
+      - F2B_LOG_LEVEL=INFO
+      - F2B_IPTABLES_CHAIN=INPUT
+
+    volumes:
+      - /root/fail2ban:/data
+      - /var/log/vaultwarden:/var/log:ro # Log mount
+
+    network_mode: "host"
+    privileged: true
+    cap_add: # Should probably remove since privileged overwrites those
+      - NET_ADMIN
+      - NET_RAW
 
 networks:
   public:
