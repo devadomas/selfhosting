@@ -38,7 +38,6 @@ services:
     networks:
       - public
 
-
   # Just for testing
   whoami:
     image: "traefik/whoami"
