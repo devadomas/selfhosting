@@ -28,7 +28,7 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik_public # maybe should be something not created via docker-compose
-      - traefik.http.routers.bitwarden.rule=Host(`$SUBDOMAIN.$BASE_DOMAIN`) & !Path('/admin')
+      - traefik.http.routers.bitwarden.rule=Host(`$SUBDOMAIN.$BASE_DOMAIN`) && !Path(`/admin`)
       - traefik.http.routers.bitwarden.entrypoints=websecure
       - traefik.http.routers.bitwarden.tls=true
       - traefik.http.routers.bitwarden.service=bitwarden
