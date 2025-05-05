@@ -37,7 +37,7 @@ services:
     labels:
       - "traefik.enable=true"
       # Middlewares for private network routes
-      - "traefik.http.middlewares.wg-allowlist.ipallowlist.sourcerange=10.8.0.0/24"
+      - "traefik.http.middlewares.wg-allowlist.ipallowlist.sourcerange=172.19.0.0/16"
     networks:
       - public
 
