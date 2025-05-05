@@ -26,6 +26,7 @@ services:
       - /root/vw-data:/data
       - /var/log/vaultwarden:/var/log # For log writing only
     labels:
+      # HTTP is disabled, server is accessible only via HTTPS
       - traefik.enable=true
       - traefik.docker.network=traefik_public # maybe should be something not created via docker-compose
       # Public Route
@@ -35,18 +36,11 @@ services:
       - traefik.http.routers.bitwarden.service=bitwarden
       - traefik.http.services.bitwarden.loadbalancer.server.port=80
       # Tunneled admin access
-      - traefik.http.routers.bitwarden-admin.rule=Host(`$SUBDOMAIN.$BASE_DOMAIN`) && PathPrefix(`/admin`) && ClientIP(`127.0.0.1/24`)
+      - traefik.http.routers.bitwarden-admin.rule=Host(`$SUBDOMAIN.$BASE_DOMAIN`) && PathPrefix(`/admin`)
+      - traefik.http.routers.bitwarden-admin.middlewares=wg-allowlist@docker
       - traefik.http.routers.bitwarden-admin.entrypoints=websecure
       - traefik.http.routers.bitwarden-admin.tls=true
       - traefik.http.routers.bitwarden-admin.service=bitwarden
-      - traefik.http.services.bitwarden-admin.loadbalancer.server.port=80
-      # HTTP is disabled, server is accessible only via HTTPS
-      # - traefik.http.middlewares.redirect-https.redirectScheme.scheme=https
-      # - traefik.http.middlewares.redirect-https.redirectScheme.permanent=true
-      # - traefik.http.routers.bitwarden-http.rule=Host(`$SUBDOMAIN.$BASE_DOMAIN`)
-      # - traefik.http.routers.bitwarden-http.entrypoints=web
-      # - traefik.http.routers.bitwarden-http.middlewares=redirect-https
-      # - traefik.http.routers.bitwarden-http.service=bitwarden
     networks:
       - public
 

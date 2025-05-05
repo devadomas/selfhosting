@@ -35,6 +35,8 @@ services:
       - "/root/letsencrypt:/letsencrypt"
     labels:
       - "traefik.enable=true"
+      # Middlewares for private network routes
+      - "traefik.http.middlewares.wg-allowlist.ipwhitelist.sourcerange=10.8.0.0/24"
     networks:
       - public
 
