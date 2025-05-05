@@ -28,7 +28,8 @@ services:
       # - ACME_EMAIL
     ports:
       - "80:80"
-      - "443:443"
+      - "443:443/udp"
+      - "443:443/tcp"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro" # Listen to docker events read-only
       # - "/var/log/traefik:/var/log" # For access logs (TODO)
