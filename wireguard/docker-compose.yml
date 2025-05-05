@@ -15,7 +15,6 @@ services:
       - net.ipv4.ip_forward=1
       - net.ipv4.conf.all.src_valid_mark=1
     networks:
-      - proxy-network
       - traefik
     ports:
        - "51820:51820/udp"
@@ -31,6 +30,4 @@ services:
 networks:
   traefik:
     name: traefik_public # traefik public network
-    external: true
-  proxy-network:
     external: true
