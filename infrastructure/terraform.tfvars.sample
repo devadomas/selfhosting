@@ -1,0 +1,23 @@
+hcloud_token="" # Token taken from Hetzner Cloud panel
+
+server_datacenter="" # Datacenter location, could be found in Terraform docks for Hetzner
+server_type="cax22" # Server type, could be found in Terraform docks for Hetzner
+server_backups_enabled=true
+
+server_timezone="Europe/Helsinki" # Server timezone in UNIX format
+
+ssh_sideload_name="" # Already uploaded ssh key name
+ssh_source_ips="" # SourceIPs for accessing ssh
+
+base_domain="example.com" # Domain
+
+cloudflare_api_email="" # Cloudflare HOST API key email
+cloudflare_api_key="" # Cloudflare HOST API key
+
+vaultwarden_admin_token="" # Vaultwarden admin token hash
+vaultwarden_installation_id=""
+vaultwarden_push_installation_key=""
+vaultwarden_push_relay_uri=""
+vaultwarden_push_identity_uri=""
+
+wireguard_password_hash="" # Wireguard admin hash
