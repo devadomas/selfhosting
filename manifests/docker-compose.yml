@@ -1,0 +1,148 @@
+services:
+  #######################
+  # Reverse proxy
+  # Exposed ports 80(HTTP) and 443(HTTPS)
+  #######################
+  traefik:
+    image: traefik:v3.3
+    container_name: traefik
+    command:
+      - "--log.level=INFO"
+      # Docker
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      # HTTP -> HTTPS
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls.domains[0].main=$BASE_DOMAIN"
+      - "--entrypoints.websecure.http.tls.domains[0].sans=*.$BASE_DOMAIN"
+      - "--entrypoints.websecure.http.tls.certresolver=myresolver"
+      # Cert generation for domain and wildcard subdomains
+      - "--certificatesresolvers.myresolver.acme.dnschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.myresolver.acme.email=$ACME_EMAIL"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    environment:
+      - CF_API_EMAIL
+      - CF_API_KEY
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik:/letsencrypt"
+    labels:
+      - "traefik.enable=true"
+      # Middlewares for private network routes(Default docker0 bridge cidr)
+      - "traefik.http.middlewares.wg-allowlist.ipallowlist.sourcerange=172.17.0.0/16"
+  
+  #######################
+  # Vaultwarden
+  #######################
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: vaultwarden
+    restart: always
+    environment:
+      - TZ
+      - DOMAIN=https://$VW_SUBDOMAIN.$BASE_DOMAIN
+      # App config
+      - ADMIN_TOKEN=${VW_ADMIN_TOKEN}
+      - SIGNUPS_ALLOWED=false
+      - INVITATIONS_ALLOWED=true
+      - SHOW_PASSWORD_HINT=false
+      # Push notifications
+      - PUSH_ENABLED=true
+      - PUSH_INSTALLATION_ID=$VW_PUSH_INSTALLATION_ID
+      - PUSH_INSTALLATION_KEY=$VW_PUSH_INSTALLATION_KEY
+      - PUSH_RELAY_URI=$VW_PUSH_RELAY_URI
+      - PUSH_IDENTITY_URI=$VW_PUSH_IDENTITY_URI
+      # Logging
+      - LOG_FILE=/var/log/vaultwarden.log
+    volumes:
+      - ./vw-data:/data
+      - /var/log/vaultwarden:/var/log
+    labels:
+      # HTTP is disabled, server is accessible only via HTTPS
+      - traefik.enable=true
+      - traefik.http.services.bitwarden.loadbalancer.server.port=80
+      # Public Route
+      - traefik.http.routers.bitwarden.rule=Host(`$VW_SUBDOMAIN.$BASE_DOMAIN`) && !PathPrefix(`/admin`)
+      - traefik.http.routers.bitwarden.entrypoints=websecure
+      - traefik.http.routers.bitwarden.tls=true
+      - traefik.http.routers.bitwarden.service=bitwarden
+      # Tunneled admin access
+      - traefik.http.routers.bitwarden-admin.rule=Host(`$VW_SUBDOMAIN.$BASE_DOMAIN`) && PathPrefix(`/admin`)
+      - traefik.http.routers.bitwarden-admin.middlewares=wg-allowlist@docker
+      - traefik.http.routers.bitwarden-admin.entrypoints=websecure
+      - traefik.http.routers.bitwarden-admin.tls=true
+      - traefik.http.routers.bitwarden-admin.service=bitwarden
+
+  #######################
+  # Wireguard
+  # Exposed port 51820
+  #######################
+  wg-easy:
+    image: ghcr.io/wg-easy/wg-easy:14
+    container_name: wg-easy
+    restart: unless-stopped
+    environment:
+     - TZ
+     - LANG=en
+     - WG_HOST=wg.$BASE_DOMAIN
+     - PASSWORD_HASH=$WG_PASSWORD_HASH
+    volumes:
+      - ./wireguard:/etc/wireguard
+    cap_add:
+      - NET_ADMIN
+      - SYS_MODULE
+    sysctls:
+      - net.ipv4.ip_forward=1
+      - net.ipv4.conf.all.src_valid_mark=1
+    ports:
+       - "51820:51820/udp" # Wireguard port
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.wg-easy.rule=Host(`wg.$BASE_DOMAIN`)"
+      - "traefik.http.routers.wg-easy.entrypoints=websecure"
+      - "traefik.http.routers.wg-easy.service=wg-easy"
+      - "traefik.http.routers.wg-easy-admin.middlewares=wg-allowlist@docker"
+      - "traefik.http.services.wg-easy.loadbalancer.server.port=51821"
+  
+  #######################
+  # Fail2ban
+  #######################
+  fail2ban:
+    image: crazymax/fail2ban:latest
+    container_name: fail2ban
+    restart: always
+    environment: 
+      - TZ
+      - F2B_DB_PURGE_AGE=30d
+      - F2B_LOG_TARGET=/data/fail2ban.log
+      - F2B_LOG_LEVEL=INFO
+      - F2B_IPTABLES_CHAIN=INPUT
+      # TODO: setup notification of bans
+    volumes:
+      - ./fail2ban:/data
+      - /var/log/vaultwarden:/var/log/vaultwarden:ro # Vaultwarden logs
+    network_mode: "host"
+    privileged: true
+    cap_add: # Should probably remove since privileged overwrites those
+      - NET_ADMIN
+      - NET_RAW
+
+  #######################
+  # Watchtower
+  #######################
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    environment:
+      - TZ
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_SCHEDULE=0 0 4 * * * # At 04:00
+      # TODO: setup notifications of failures
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
