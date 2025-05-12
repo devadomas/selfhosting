@@ -5,7 +5,7 @@ locals {
   package_update: true
   package_upgrade: true
 
-  timezone: Australia/Melbourne
+  timezone: ${var.server_timezone}
 
   apt:
     sources:
