@@ -17,24 +17,7 @@ resource "hcloud_server" "server" {
     var.ssh_sideload_name != null ? [data.hcloud_ssh_key.provided[0].id] : []
   ])
 
-  connection {
-    host        = hcloud_primary_ip.server_primary_ip.ip_address
-    user        = "root"
-    type        = "ssh"
-    agent       = true
-    timeout     = "3m"
-    private_key = tls_private_key.server_key.private_key_openssh
-  }
-
-  # Walkaround for remote-exec's flaw of not accepting environment variables
-  provisioner "remote-exec" {
-    inline = ["timedatectl set-timezone ${var.server_timezone}"]
-  }
-
-  # Server init script updates server, installs docker, schedules unassisted upgrades, outputs log to /var/log/server-init.log
-  provisioner "remote-exec" {
-    script = "${path.module}/scripts/init.sh"
-  }
+  user_data = local.cloud_config
 }
 
 resource "null_resource" "provision_containers" {

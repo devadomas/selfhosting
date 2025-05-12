@@ -1,4 +1,34 @@
 locals {
+  cloud_config = <<EOT
+  #cloud-config
+
+  package_update: true
+  package_upgrade: true
+
+  timezone: Australia/Melbourne
+
+  apt:
+    sources:
+      docker.list:
+        source: deb [arch=arm64] https://download.docker.com/linux/debian $RELEASE stable
+        keyid: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+
+  packages:
+    - curl
+    - ca-certificates
+    - docker-ce
+    - docker-ce-cli
+    - containerd.io
+    - docker-buildx-plugin
+    - docker-compose-plugin
+
+  write_files:
+    - path: /etc/apt/apt.conf.d/55unattended-upgrades-local
+      content: |
+        Unattended-Upgrade::Automatic-Reboot "true";
+        Unattended-Upgrade::Automatic-Reboot-Time "02:00";
+  EOT
+
   env_file         = <<EOT
   TZ=${var.server_timezone}
   BASE_DOMAIN=${var.base_domain}
