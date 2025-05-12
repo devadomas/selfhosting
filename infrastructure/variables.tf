@@ -74,6 +74,34 @@ variable "vaultwarden_push_identity_uri" {
   default = "https://identity.bitwarden.eu"
 }
 
+# Vaultwarden backup configuration
+variable "vaultwarden_backup_access_key_id" {
+  description = "Vaultwarden backup S3 compatible bucket Access Key ID"
+  type        = string
+  sensitive   = true
+}
+
+variable "vaultwarden_backup_secret_access_key" {
+  description = "Vaultwarden backup S3 compatible bucket Secret Access Key"
+  type        = string
+  sensitive   = true
+}
+
+variable "vaultwarden_backup_endpoint" {
+  description = "Vaultwarden backup endpoint"
+  type        = string
+}
+
+variable "vaultwarden_backup_bucket" {
+  description = "Vaultwarden backup bucket"
+  type        = string
+}
+
+variable "vaultwarden_backup_password" {
+  description = "Vaultwarden backup archive password"
+  type        = string
+}
+
 # Wireguard configuration
 variable "wireguard_password_hash" {
   description = "Wireguard Password hash for admin panel"

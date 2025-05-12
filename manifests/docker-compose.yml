@@ -81,6 +81,35 @@ services:
       - traefik.http.routers.bitwarden-admin.service=bitwarden
 
   #######################
+  # Vaultwarden Backups
+  #######################
+  vaultwarden_backup:
+    image: ttionya/vaultwarden-backup:latest
+    container_name: vaultwarden-backup
+    restart: always
+    # Walkaround: terraform looses permissions of shell script
+    entrypoint: /bin/sh -c "chmod +x /configure-rclone.sh && /configure-rclone.sh"
+    environment:
+      - TIMEZONE=$TZ
+      - RCLONE_REMOTE_DIR=$VW_BACKUP_BUCKET
+      - CRON=0 1 * * * # At 01:00
+      - ZIP_ENABLE=TRUE
+      - ZIP_PASSWORD=$VW_BACKUP_PASSWORD
+      - BACKUP_KEEP_DAYS=30
+      - ENDPOINT_URI=$VW_BACKUP_ENDPOINT
+      - ACCESS_KEY_ID=$VW_BACKUP_ACCESS_KEY_ID
+      - SECRET_ACCESS_KEY=$VW_BACKUP_SECRET_ACCESS_KEY
+    # TODO: configure in future
+    #   MAIL_SMTP_ENABLE: 'FALSE'
+    #   MAIL_SMTP_VARIABLES: ''
+    #   MAIL_TO: ''
+    #   MAIL_WHEN_SUCCESS: 'TRUE'
+    #   MAIL_WHEN_FAILURE: 'TRUE'
+    volumes:
+      - ./vw-data:/bitwarden/data/
+      - ./rclone/configure-rclone.sh:/configure-rclone.sh
+
+  #######################
   # Wireguard
   # Exposed port 51820
   #######################

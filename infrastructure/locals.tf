@@ -11,6 +11,11 @@ locals {
   VW_PUSH_INSTALLATION_KEY=${var.vaultwarden_push_installation_key}
   VW_PUSH_RELAY_URI=${var.vaultwarden_push_relay_uri}
   VW_PUSH_IDENTITY_URI=${var.vaultwarden_push_identity_uri}
+  VW_BACKUP_ACCESS_KEY_ID=${var.vaultwarden_backup_access_key_id}
+  VW_BACKUP_SECRET_ACCESS_KEY=${var.vaultwarden_backup_secret_access_key}
+  VW_BACKUP_ENDPOINT=${var.vaultwarden_backup_endpoint}
+  VW_BACKUP_BUCKET=${var.vaultwarden_backup_bucket}
+  VW_BACKUP_PASSWORD=${var.vaultwarden_backup_password}
   WG_PASSWORD_HASH=${var.wireguard_password_hash}
   EOT
   env_content_hash = sha256(local.env_file)
