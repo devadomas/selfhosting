@@ -62,7 +62,7 @@ services:
       # Logging
       - LOG_FILE=/var/log/vaultwarden.log
     volumes:
-      - ./vw-data:/data
+      - ./vw-data:/data # Sourced from server's local dir, to overcome accidental deletion
       - /var/log/vaultwarden:/var/log
     labels:
       # HTTP is disabled, server is accessible only via HTTPS
